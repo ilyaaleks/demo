@@ -65,16 +65,13 @@ class AdminServiceHandler implements EventHandler {
 
 	private final Messages messages;
 
-	private final CqnAnalyzer analyzer;
-
 
 	private final AuditLogMessageFactory auditLogMessageFactory;
 
-	public AdminServiceHandler(DraftService adminService, PersistenceService db, Messages messages, CqnAnalyzer analyzer, AuditLogMessageFactory auditLogMessageFactory) {
+	public AdminServiceHandler(DraftService adminService, PersistenceService db, Messages messages, AuditLogMessageFactory auditLogMessageFactory) {
 		this.adminService = adminService;
 		this.db = db;
 		this.messages = messages;
-		this.analyzer = analyzer;
 		this.auditLogMessageFactory = auditLogMessageFactory;
 	}
 
@@ -133,36 +130,10 @@ class AdminServiceHandler implements EventHandler {
 		});
 	}
 
-	/**
-	 * Calculate the total order value preview when editing an order item
-	 *
-	 * @param context
-	 * @param orderItem
-	 */
-	@Before(event = DraftService.EVENT_DRAFT_PATCH)
-	public void patchOrderItems(DraftPatchEventContext context, OrderItems orderItem) {
-		// check if amount or book was updated
-		Integer amount = orderItem.getAmount();
-		String bookId = orderItem.getBookId();
-		String orderItemId = (String) analyzer.analyze(context.getCqn()).targetKeys().get(OrderItems.ID);
-		BigDecimal netAmount = calculateNetAmountInDraft(orderItemId, amount, bookId);
-		if (netAmount != null) {
-			orderItem.setNetAmount(netAmount);
-		}
-	}
 
-	/**
-	 * Calculate the total order value preview when deleting an order item from the order
-	 *
-	 * @param context
-	 */
-	@Before(event = DraftService.EVENT_DRAFT_CANCEL, entity = OrderItems_.CDS_NAME)
-	public void cancelOrderItems(DraftCancelEventContext context) {
-		String orderItemId = (String) analyzer.analyze(context.getCqn()).targetKeys().get(OrderItems.ID);
-		if(orderItemId != null) {
-			calculateNetAmountInDraft(orderItemId, 0, null);
-		}
-	}
+
+
+
 	@On(event=CdsService.EVENT_READ)
 	public void auditLog(List<Books> books)
 	{
@@ -263,13 +234,10 @@ class AdminServiceHandler implements EventHandler {
 			order.setItems(new ArrayList<>());
 		}
 
-		// get ID of the book on which the action was called (bound action)
-		String bookId = (String) analyzer.analyze(context.getCqn()).targetKeys().get(Books.ID);
 
 		// create order item
 		OrderItems newItem = OrderItems.create();
 		newItem.setId(UUID.randomUUID().toString());
-		newItem.setBookId(bookId);
 		newItem.setAmount(context.getAmount());
 		order.getItems().add(newItem);
 
