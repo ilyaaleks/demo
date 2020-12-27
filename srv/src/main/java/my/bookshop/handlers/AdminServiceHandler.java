@@ -9,8 +9,16 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 import java.util.function.Supplier;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import com.sap.cds.services.request.UserInfo;
+import com.sap.xs.audit.api.exception.AuditLogNotAvailableException;
+import com.sap.xs.audit.api.exception.AuditLogWriteException;
+import com.sap.xs.audit.api.v2.AuditLogMessageFactory;
+import com.sap.xs.audit.api.v2.AuditedDataSubject;
+import com.sap.xs.audit.api.v2.AuditedObject;
+import com.sap.xs.audit.api.v2.DataAccessAuditMessage;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
@@ -59,13 +67,17 @@ class AdminServiceHandler implements EventHandler {
 
 	private final CqnAnalyzer analyzer;
 
-	AdminServiceHandler(@Qualifier(AdminService_.CDS_NAME) DraftService adminService, PersistenceService db, Messages messages, CdsModel model) {
+	private final UserInfo user;
+
+	private final AuditLogMessageFactory auditLogMessageFactory;
+
+	public AdminServiceHandler(DraftService adminService, PersistenceService db, Messages messages, CqnAnalyzer analyzer, UserInfo user, AuditLogMessageFactory auditLogMessageFactory) {
 		this.adminService = adminService;
 		this.db = db;
 		this.messages = messages;
-
-		// model is a tenant-dependant model proxy
-		this.analyzer = CqnAnalyzer.create(model);
+		this.analyzer = analyzer;
+		this.user = user;
+		this.auditLogMessageFactory = auditLogMessageFactory;
 	}
 
 	/**
@@ -151,6 +163,29 @@ class AdminServiceHandler implements EventHandler {
 		String orderItemId = (String) analyzer.analyze(context.getCqn()).targetKeys().get(OrderItems.ID);
 		if(orderItemId != null) {
 			calculateNetAmountInDraft(orderItemId, 0, null);
+		}
+	}
+	@On(event=CdsService.EVENT_READ)
+	public void auditLog(List<Books> books)
+	{
+		final DataAccessAuditMessage message = auditLogMessageFactory.createDataAccessAuditMessage();
+		final AuditedDataSubject auditedDataSubject = auditLogMessageFactory.createAuditedDataSubject();
+		final AuditedObject auditedObject = auditLogMessageFactory.createAuditedObject();
+		final String booksIds = books.stream().map(Books::getId).collect(Collectors.joining(", "));
+		auditedObject.addIdentifier("Books which has been read",booksIds);
+		final String roles = user.getRoles().stream().collect(Collectors.joining(", "));
+		auditedDataSubject.setRole(roles);
+		auditedDataSubject.setType("Test");
+		message.setDataSubject(auditedDataSubject);
+		message.addAttachment("test_attr","test_attr");
+		message.setTenant(user.getTenant());
+		message.setObject(auditedObject);
+		try {
+			message.log();
+		} catch (AuditLogNotAvailableException e) {
+			e.printStackTrace();
+		} catch (AuditLogWriteException e) {
+			e.printStackTrace();
 		}
 	}
 
