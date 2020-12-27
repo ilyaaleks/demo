@@ -67,16 +67,14 @@ class AdminServiceHandler implements EventHandler {
 
 	private final CqnAnalyzer analyzer;
 
-	private final UserInfo user;
 
 	private final AuditLogMessageFactory auditLogMessageFactory;
 
-	public AdminServiceHandler(DraftService adminService, PersistenceService db, Messages messages, CqnAnalyzer analyzer, UserInfo user, AuditLogMessageFactory auditLogMessageFactory) {
+	public AdminServiceHandler(DraftService adminService, PersistenceService db, Messages messages, CqnAnalyzer analyzer, AuditLogMessageFactory auditLogMessageFactory) {
 		this.adminService = adminService;
 		this.db = db;
 		this.messages = messages;
 		this.analyzer = analyzer;
-		this.user = user;
 		this.auditLogMessageFactory = auditLogMessageFactory;
 	}
 
@@ -173,12 +171,9 @@ class AdminServiceHandler implements EventHandler {
 		final AuditedObject auditedObject = auditLogMessageFactory.createAuditedObject();
 		final String booksIds = books.stream().map(Books::getId).collect(Collectors.joining(", "));
 		auditedObject.addIdentifier("Books which has been read",booksIds);
-		final String roles = user.getRoles().stream().collect(Collectors.joining(", "));
-		auditedDataSubject.setRole(roles);
 		auditedDataSubject.setType("Test");
 		message.setDataSubject(auditedDataSubject);
 		message.addAttachment("test_attr","test_attr");
-		message.setTenant(user.getTenant());
 		message.setObject(auditedObject);
 		try {
 			message.log();
