@@ -2,7 +2,6 @@ package my.bookshop.handlers;
 
 import static cds.gen.catalogservice.CatalogService_.BOOKS;
 
-import java.awt.print.Book;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -10,11 +9,8 @@ import java.util.stream.Stream;
 import cds.gen.catalogservice.Books_;
 import com.sap.cds.services.handler.annotations.On;
 import com.sap.cds.services.request.UserInfo;
-import com.sap.xs.audit.api.exception.AuditLogNotAvailableException;
-import com.sap.xs.audit.api.exception.AuditLogWriteException;
 import com.sap.xs.audit.api.v2.AuditLogMessageFactory;
 import com.sap.xs.audit.api.v2.AuditedDataSubject;
-import com.sap.xs.audit.api.v2.AuditedObject;
 import com.sap.xs.audit.api.v2.DataAccessAuditMessage;
 import com.sap.xs.audit.api.v2.DataModificationAuditMessage;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -47,30 +43,6 @@ class CatalogServiceHandler implements EventHandler {
         this.auditLogMessageFactory = auditLogMessageFactory;
         this.db = db;
         this.user = user;
-    }
-
-    @On(event = CdsService.EVENT_READ)
-    public void logMethod(List<Books> books) {
-        final DataAccessAuditMessage message = auditLogMessageFactory.createDataAccessAuditMessage();
-//        final AuditedDataSubject auditedDataSubject = auditLogMessageFactory.createAuditedDataSubject();
-//        final AuditedObject auditedObject = auditLogMessageFactory.createAuditedObject();
-//        final String booksIds = books.stream().map(Books::getId).collect(Collectors.joining(", "));
-//        auditedObject.addIdentifier("Books which has been read",booksIds);
-//        final String roles = user.getRoles().stream().collect(Collectors.joining(", "));
-//        auditedDataSubject.setRole(roles);
-//        auditedDataSubject.setType("Test");
-//        message.setDataSubject(auditedDataSubject);
-//        message.addAttachment("test_attr","test_attr");
-//        message.setTenant(user.getTenant());
-//        message.setObject(auditedObject);
-        message.addAttachment("test_attr","test_attr");
-        try {
-            message.log();
-        } catch (AuditLogNotAvailableException e) {
-            e.printStackTrace();
-        } catch (AuditLogWriteException e) {
-            e.printStackTrace();
-        }
     }
 
     @After(event = CdsService.EVENT_READ)
