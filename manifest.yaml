@@ -5,3 +5,5 @@ applications:
     services:
       - bookstore-hana
       - auditlog-api
+    env:
+      JBP_CONFIG_DEBUG: '{enabled: true}'
