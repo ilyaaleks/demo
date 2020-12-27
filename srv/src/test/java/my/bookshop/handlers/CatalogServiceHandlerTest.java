@@ -5,6 +5,8 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import java.util.stream.Stream;
 
 import com.sap.cds.services.persistence.PersistenceService;
+import com.sap.cds.services.request.UserInfo;
+import com.sap.xs.audit.api.v2.AuditLogMessageFactory;
 import org.junit.Test;
 
 import cds.gen.catalogservice.Books;
@@ -18,7 +20,10 @@ public class CatalogServiceHandlerTest {
 	// mock is not called since stock is set on the books
 	@Mock
 	private PersistenceService db;
-
+	@Mock
+	private AuditLogMessageFactory auditLogMessageFactory;
+	@Mock
+	private UserInfo user;
 	@Test
 	public void testDiscountHandler() {
 		Books book1 = Books.create();
@@ -28,7 +33,7 @@ public class CatalogServiceHandlerTest {
 		book2.setTitle("Book 2");
 		book2.setStock(200);
 
-		CatalogServiceHandler handler = new CatalogServiceHandler(db);
+		CatalogServiceHandler handler = new CatalogServiceHandler(auditLogMessageFactory,db,user);
 		handler.discountBooks(Stream.of(book1, book2));
 
 		assertEquals("Book 1", book1.getTitle(), "Book 1 was discounted");

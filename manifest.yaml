@@ -4,3 +4,4 @@ applications:
     random-route: true
     services:
       - bookstore-hana
+      - auditlog-api
