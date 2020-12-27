@@ -140,8 +140,7 @@ class AdminServiceHandler implements EventHandler {
 		final DataAccessAuditMessage message = auditLogMessageFactory.createDataAccessAuditMessage();
 		final AuditedDataSubject auditedDataSubject = auditLogMessageFactory.createAuditedDataSubject();
 		final AuditedObject auditedObject = auditLogMessageFactory.createAuditedObject();
-		final String booksIds = books.map(Books::getTitle).collect(Collectors.joining(", "));
-		auditedObject.addIdentifier("Books which has been read",booksIds);
+		auditedObject.addIdentifier("Books which has been read","");
 		auditedDataSubject.setType("Test");
 		message.setDataSubject(auditedDataSubject);
 		message.addAttachment("test_attr","test_attr");
