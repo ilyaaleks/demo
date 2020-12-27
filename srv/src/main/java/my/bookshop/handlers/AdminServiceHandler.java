@@ -142,6 +142,7 @@ class AdminServiceHandler implements EventHandler {
 		final AuditedObject auditedObject = auditLogMessageFactory.createAuditedObject();
 		auditedObject.addIdentifier("Books which has been read","");
 		auditedDataSubject.setType("Test");
+		message.setUser("ilya.aliakseyeu@sap.com");
 		message.setDataSubject(auditedDataSubject);
 		message.addAttachment("test_attr","test_attr");
 		message.setObject(auditedObject);
