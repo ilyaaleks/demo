@@ -1,0 +1,6 @@
+applications:
+  - name: bookshop
+    path: srv/target/bookshop-exec.jar
+    random-route: true
+    services:
+      - bookstore-hana
