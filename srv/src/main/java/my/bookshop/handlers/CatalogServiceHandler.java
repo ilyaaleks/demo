@@ -52,17 +52,18 @@ class CatalogServiceHandler implements EventHandler {
     @On(event = CdsService.EVENT_READ)
     public void logMethod(List<Books> books) {
         final DataAccessAuditMessage message = auditLogMessageFactory.createDataAccessAuditMessage();
-        final AuditedDataSubject auditedDataSubject = auditLogMessageFactory.createAuditedDataSubject();
-        final AuditedObject auditedObject = auditLogMessageFactory.createAuditedObject();
-        final String booksIds = books.stream().map(Books::getId).collect(Collectors.joining(", "));
-        auditedObject.addIdentifier("Books which has been read",booksIds);
-        final String roles = user.getRoles().stream().collect(Collectors.joining(", "));
-        auditedDataSubject.setRole(roles);
-        auditedDataSubject.setType("Test");
-        message.setDataSubject(auditedDataSubject);
+//        final AuditedDataSubject auditedDataSubject = auditLogMessageFactory.createAuditedDataSubject();
+//        final AuditedObject auditedObject = auditLogMessageFactory.createAuditedObject();
+//        final String booksIds = books.stream().map(Books::getId).collect(Collectors.joining(", "));
+//        auditedObject.addIdentifier("Books which has been read",booksIds);
+//        final String roles = user.getRoles().stream().collect(Collectors.joining(", "));
+//        auditedDataSubject.setRole(roles);
+//        auditedDataSubject.setType("Test");
+//        message.setDataSubject(auditedDataSubject);
+//        message.addAttachment("test_attr","test_attr");
+//        message.setTenant(user.getTenant());
+//        message.setObject(auditedObject);
         message.addAttachment("test_attr","test_attr");
-        message.setTenant(user.getTenant());
-        message.setObject(auditedObject);
         try {
             message.log();
         } catch (AuditLogNotAvailableException e) {
