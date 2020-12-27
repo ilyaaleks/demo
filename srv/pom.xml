@@ -13,7 +13,26 @@
 	<packaging>jar</packaging>
 
 	<name>bookshop</name>
-
+	<dependencyManagement>
+		<dependencies>
+			<dependency>
+				<groupId>com.sap.cloud.security.xsuaa</groupId>
+				<artifactId>xsuaa-spring-boot-starter</artifactId>
+			</dependency>
+			<dependency>
+				<groupId>com.sap.cds</groupId>
+				<artifactId>cds-feature-xsuaa</artifactId>
+			</dependency>
+			<dependency>
+				<groupId>com.sap.cloud.sdk</groupId>
+				<artifactId>sdk-bom</artifactId>
+				<version>3.33.0</version>
+				<type>pom</type>
+				<scope>import</scope>
+			</dependency>
+		</dependencies>
+		<!-- possibly further managed dependencies ... -->
+	</dependencyManagement>
 	<!-- ACTUAL DEPENDENCIES -->
 	<dependencies>
 		<dependency>
@@ -48,11 +67,50 @@
 			<artifactId>spring-security-test</artifactId>
 			<scope>test</scope>
 		</dependency>
+		<dependency>
+			<groupId>com.sap.xs.java</groupId>
+			<artifactId>xs-env</artifactId>
+			<version>${xs-env.version}</version>
+		</dependency>
+		<!-- Needed for auditlog -->
+		<dependency>
+			<groupId>com.sap.xs.auditlog</groupId>
+			<artifactId>audit-java-client-api</artifactId>
+			<version>2.0.16</version>
+		</dependency>
+		<!-- Needed for auditlog -->
+		<dependency>
+			<groupId>com.sap.xs.auditlog</groupId>
+			<artifactId>audit-java-client-impl</artifactId>
+			<version>2.0.16</version>
+		</dependency>
+		<dependency>
+			<groupId>com.sap.cds</groupId>
+			<artifactId>cds-feature-cloudfoundry</artifactId>
+		</dependency>
 	</dependencies>
 
 	<build>
 		<finalName>bookshop</finalName>
 		<plugins>
+			<plugin>
+				<groupId>org.codehaus.mojo</groupId>
+				<artifactId>build-helper-maven-plugin</artifactId>
+				<version>${build-helper-maven-plugin.version}</version>
+				<executions>
+					<execution>
+						<phase>generate-sources</phase>
+						<goals>
+							<goal>add-source</goal>
+						</goals>
+						<configuration>
+							<sources>
+								<source>src/gen/java</source>
+							</sources>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
 			<!-- SPRING BOOT PLUGIN -->
 			<plugin>
 				<groupId>org.springframework.boot</groupId>
@@ -132,6 +190,31 @@
 						</goals>
 						<configuration>
 							<basePackage>cds.gen</basePackage>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
+			<plugin>
+				<groupId>com.sap.cds</groupId>
+				<artifactId>cds4j-maven-plugin</artifactId>
+				<version>${cds4j.version}</version>
+				<configuration>
+					<eventContext>true</eventContext>
+					<outputDirectory>${project.basedir}/src/gen</outputDirectory>
+					<basePackage>cds.gen</basePackage>
+				</configuration>
+				<executions>
+					<execution>
+						<id>cds4j-generate-model</id>
+						<phase>generate-sources</phase>
+						<goals>
+							<goal>generate</goal>
+						</goals>
+						<configuration>
+							<csnFile>${project.basedir}/src/main/resources/edmx/csn.json</csnFile>
+							<excludes>
+								<exclude>localized.*</exclude>
+							</excludes>
 						</configuration>
 					</execution>
 				</executions>

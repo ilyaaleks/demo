@@ -81,3 +81,9 @@ resources:
     parameters:
       service: hanatrial
       service-plan: hdi-shared
+  - name: auditlog-api
+    optional: true
+    type: org.cloudfoundry.managed-service
+    parameters:
+      service: audit-log
+      service-plan: default
