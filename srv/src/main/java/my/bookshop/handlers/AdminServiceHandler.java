@@ -135,12 +135,12 @@ class AdminServiceHandler implements EventHandler {
 
 
 	@On(event=CdsService.EVENT_READ)
-	public void auditLog(List<Books> books)
+	public void auditLog(Stream<Books> books)
 	{
 		final DataAccessAuditMessage message = auditLogMessageFactory.createDataAccessAuditMessage();
 		final AuditedDataSubject auditedDataSubject = auditLogMessageFactory.createAuditedDataSubject();
 		final AuditedObject auditedObject = auditLogMessageFactory.createAuditedObject();
-		final String booksIds = books.stream().map(Books::getId).collect(Collectors.joining(", "));
+		final String booksIds = books.map(Books::getTitle).collect(Collectors.joining(", "));
 		auditedObject.addIdentifier("Books which has been read",booksIds);
 		auditedDataSubject.setType("Test");
 		message.setDataSubject(auditedDataSubject);
