@@ -1,0 +1,12 @@
+{
+  "welcomeFile": "/cp.portal",
+  "authenticationMethod": "route",
+  "routes": [
+    {
+      "source": "/",
+      "target": "/",
+      "destination": "dest-bookshop-bankscrtysrv",
+      "authenticationType": "xsuaa"
+    }
+  ]
+}

@@ -1,21 +1,19 @@
 {
-	"xsappname": "bookshop-java-demo-logging-audit",
-	"tenant-mode": "dedicated",
+	"xsappname": "bookshop-security",
+	"tenant-mode": "shared",
 	"scopes": [
-	  {
-		"name": "$XSAPPNAME.admin",
-		"description": "admin"
-	  }
+		{
+			"name": "$XSAPPNAME.Display",
+			"description": "display"
+		}
 	],
-	"attributes": [],
 	"role-templates": [
-	  {
-		"name": "admin",
-		"description": "generated",
-		"scope-references": [
-		  "$XSAPPNAME.admin"
-		],
-		"attribute-references": []
-	  }
+		{
+			"name": "Viewer",
+			"description": "Required to view things in our solution",
+			"scope-references"     : [
+				"$XSAPPNAME.Display"
+			]
+		}
 	]
-  }
+}

@@ -1,0 +1,13 @@
+applications:
+  - name: sapccp-bookshopsrv-approuter
+    routes:
+      - route: sapccp-bookshopsrv-approuter-5e37d38atrial.cfapps.eu10.hana.ondemand.com
+    path: /
+    memory: 128M
+    buildpacks:
+    - nodejs_buildpack
+    env:
+      TENANT_HOST_PATTERN: 'https://sapccp-bookshopsrv-approuter-(.*).cfapps.eu10.hana.ondemand.com'
+      destinations: '[{"name":"dest-bookshop-bankscrtysrv", "url" :"https://bookshop-5e37d38atrial.cfapps.eu10.hana.ondemand.com", "forwardAuthToken": true}]'
+    services:
+      - bookshop-security

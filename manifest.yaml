@@ -1,7 +1,9 @@
 applications:
   - name: bookshop
+    routes:
+      - route: bookshop-c4p-pfm-leverx.cfapps.sap.hana.ondemand.com/
     path: srv/target/bookshop-exec.jar
-    random-route: true
+#    random-route: true
     services:
       - bookstore-hana
       - auditlog-api

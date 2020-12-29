@@ -12,6 +12,7 @@ import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import com.sap.cds.services.EventContext;
 import com.sap.cds.services.request.UserInfo;
 import com.sap.xs.audit.api.exception.AuditLogNotAvailableException;
 import com.sap.xs.audit.api.exception.AuditLogWriteException;
@@ -19,6 +20,7 @@ import com.sap.xs.audit.api.v2.AuditLogMessageFactory;
 import com.sap.xs.audit.api.v2.AuditedDataSubject;
 import com.sap.xs.audit.api.v2.AuditedObject;
 import com.sap.xs.audit.api.v2.DataAccessAuditMessage;
+import com.sap.xs.audit.api.v2.DataModificationAuditMessage;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
@@ -134,25 +136,37 @@ class AdminServiceHandler implements EventHandler {
 
 
 
-	@On(event=CdsService.EVENT_READ)
-	public void auditLog(Stream<Books> books)
+	@On(event=CdsService.EVENT_READ, entity = Books_.CDS_NAME)
+	public void auditLog(EventContext eventContext)
 	{
-		final DataAccessAuditMessage message = auditLogMessageFactory.createDataAccessAuditMessage();
-		final AuditedDataSubject auditedDataSubject = auditLogMessageFactory.createAuditedDataSubject();
-		final AuditedObject auditedObject = auditLogMessageFactory.createAuditedObject();
-		auditedObject.addIdentifier("Books which has been read","");
-		auditedDataSubject.setType("Test");
-		message.setUser("ilya.aliakseyeu@sap.com");
+		DataModificationAuditMessage message = auditLogMessageFactory.createDataModificationAuditMessage();
+
+		message.setUser("ilya.aliakseyeu@sap.com"); // [NOTE] When using “standard” plan of auditlog service you should specify the user yourself. When using “oauth2” plan of auditlog service you should write setUser(“$USER”) and the user will be set automatically on server side.
+
+		message.setTenant("ilya.aliakseyeu@sap.com"); // [NOTE] When using “standard” plan of auditlog service you should specify the tenant yourself. When using “oauth2” plan of auditlog service you should write setTenant(“$PROVIDER”) if you want to log the message for the provider and the tenant will be set automatically on server side. If you want to log the message for the subscriber, you should use the method setTenant(“$SUBSCRIBER”, subscriber-token-issuer-here).
+
+		AuditedObject auditedObject = auditLogMessageFactory.createAuditedObject();
+		auditedObject.setType("online system");
+		auditedObject.addIdentifier("name", "Students info system");
+		auditedObject.addIdentifier("module", "Foreign students");
+				message.setObject(auditedObject);
+
+		AuditedDataSubject auditedDataSubject = auditLogMessageFactory.createAuditedDataSubject();
+		auditedDataSubject.setType("student");
+		auditedDataSubject.setRole("foreign student");
+		auditedDataSubject.addIdentifier("student_id", "333333");
+		auditedDataSubject.addIdentifier("first name", "John");
+		auditedDataSubject.addIdentifier("last name", "Smith");
 		message.setDataSubject(auditedDataSubject);
-		message.addAttachment("test_attr","test_attr");
-		message.setObject(auditedObject);
+		message.addAttribute("town", "London", "Sofia");
 		try {
-			message.log();
+			message.logSuccess();
 		} catch (AuditLogNotAvailableException e) {
 			e.printStackTrace();
 		} catch (AuditLogWriteException e) {
 			e.printStackTrace();
 		}
+		eventContext.setCompleted();
 	}
 
 	private BigDecimal calculateNetAmountInDraft(String orderItemId, Integer newAmount, String newBookId) {
